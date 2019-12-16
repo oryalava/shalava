@@ -1,0 +1,183 @@
+% !TEX encoding = IsoLatinGreek
+\documentclass[11pt,a4paper]{article}
+\usepackage{lineno}
+\usepackage{gensymb}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{upgreek}
+\usepackage{empheq}
+\usepackage{graphicx}
+% macros
+\newcommand{\Nabla}{\boldsymbol{\nabla}}
+\newcommand{\Frac}[2]{\displaystyle \frac{#1}{#2} }
+\newcommand{\fracial}[2]{\displaystyle \frac{\partial #1}{\partial #2} }
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\ubf}{\mathbf{u}}
+\newtheorem{algorithm}{Algorithm}
+
+
+\title{ShaLava: a platform to model lava flows in 3D}
+\author{No? Bernabeu, Orya?lle Chevrel, Pierre Saramito, Andrew Harris}
+\date\today
+
+
+\begin{document} 
+\maketitle
+%\vfill \newpage
+\linenumbers
+
+% ---------------------------------------------
+\section*{Abstract} 
+% ---------------------------------------------
+TODO
+
+
+% -----------------------------------------------------------------------------
+\section{Introduction}
+% -----------------------------------------------------------------------------
+
+Lava flows are one of the most common volcanic hazards in the world, but they rarely threat populations (Harris 2015). Ones of the most lethal examples are the eruptions of Nyiragongo Volcano in the Democratic Republic of Congo (DRC) in 1977 and 2002. In 2002, the eruption formed two large, extremely fluid and fast lava flows that reached the city in a matter of hours. About 250 people died for reasons directly or indirectly related to the eruption: asphyxiation of carbon dioxide, collapse of buildings due to lava or earthquakes, gas station explosion surrounded by still hot lava. About 120,000 people were homeless, 15 of the city and one third of the airport runway were completely destroyed, covered by lava (Tedesco et al., 2007, Figure 1). Apart from this example, in most cases, lava flows are slow enough to allow populations to evacuate. However, even if the human losses due to lava flow hazard are small compared to those caused by explosive eruptions, lava flows destroy absolutely everything in their path which can have long lasting effects on local economies. For example, in June 2018, the eruption of Kilauea in Hawaii (Neal et al., 2018) caused no deaths but destroyed more than 700 homes and caused losses estimated at more than 800 million in five months.\\
+Lava flows are gravity currents propagating under their own weight. Their emplacement dynamics (speed, rheological behavior, morphology, final length) depends mainly on the effusion rate, the volume emitted, the topography and the rheological properties of the lava. The higher the effusion rate and volume, the longer the flow. The lower the viscosity and the steeper slope, the faster the flow advance. \\
+During an eruption, the advance of a flow, its velocity, volume, and flow rate can be determined from observations in the field or by remote sensing techniques (e.g. Harris et al., 2016, Coppola et al. 2017). The topography is generally known but in some cases the rapid evolution of the lava field does not make it possible to update the digital elevation model (DEM). Additionally, rheological properties are subject to great uncertainties because of a strong temperature gradient between the surface and the interior.\\
+To model the dynamics of the lava effusion, deterministic models are based on the conservation laws of fluid mechanics (Navier-Stokes equations) associated with a Newtonian or non-Newtonian constitutive law (Bingham fluid) (ex. : Dragoni et al 1986, Miyamoto and Papp 2004, Del Negro et al 2005, Kelfoun and Vargas 2016, Bernabeu et al 2016). Most models can take into account a large number of parameters characterising the eruption (topography, effusion rate, volume, rheology). The rheology of the lava is often simply taken into account by introducing a maximum value (viscosity or yield strength) above which flow is impossible and rarely as a function of temperature. Some model (e.g.) are able to model the variation of rheology based on a heat budget, but it is restrain to 1D and hardly extendable to 3D modelling. \\
+The resolution of the 3D problem is too costly from a numerical point of view. To improve numerical simulation, a thin approximation is made on the lava height. By mathematical techniques of asymptotic development and averaging in the thickness and placing it in a laminar regime, the equations can be reduce to a two-dimensional problem on the lava height (e.g. Bernabeu et al., 2016). In this form, computation times are greatly reduced and it is possible to model in real time a volcanic eruption.\\
+In the recent years effort has been made to determined a series of benchmarks for modelling lava flows. Several studies have provided comparisons between models (Harris et al. Cordonnier et al. Dietterich et al.). Conclusion of these studies showed that for a better accuracy this model is better than another, this computed time is better than another, etc..\\
+The model proposed by Bernabeu et al. 2016 was an attempts to take into account the temperature etc..; howver this model suffers of ...\\
+In Bernabeu et al. 2018 an alternative model was proposed with a different solution. This model was disaigned to allow obstacle to be taken into account blabla\\
+Here we present an open source software that uses this code to model lava flow. Shalava (named after the mathematical approximation of SHAllow water solution for lava flow) is a user friendly tool to model any flows given a number of inputs parameters.\\
+We described the interface and all input parameters. We hope this tool can be tested and used for scientific purposes to evaluate the threat of the lava on humain society as well as an educatif tool to show how each parameters will influence the flow velocity, extension or thickness.\\
+To validate the code and the software we present three well known exemple at Etna 2001 lava (recommanded benchmark by Cordonnier et al.), at Piton de la Fournaise 2018 lava flow.
+So far only basaltic flow were tested. Further work and validation will be necessarly to apply this model for more silicic flows.
+
+
+% -----------------------------------------------------------------------------
+\section{Equation solving and numerical methods}
+% -----------------------------------------------------------------------------
+To model the progression of lava flow on a topography we have used the reduced model presented in [ref].  The flowing lava is described by a Bingham behavior law. This model is valid only for laminar and shallow depth fluids. After an asymptotic vertical reduction detailed in [ref], the evolution of the height of the flow $h$
+is given by the following diffusive equation:
+\begin{equation}
+   \partial_t h
+   - \left( \Frac{\rho g}{\eta} \right)
+   \text{div}_{\parallel}
+   \left\{
+     \mu\left(h,\,|\Nabla_{\parallel}(f+h)|\right)
+     \ \Nabla_{\parallel}(f+h)
+   \right\} 
+   =
+   w_e,
+   \label{eq-reduced-h-dimension}
+\end{equation}
+where all the parameters are given in tab[ref] and $\mu$ denotes a diffusion coefficient, defined for all $h,\xi\in\mathbb{R}^+$ by:
+\begin{equation*} 
+   \mu(h,\,\xi)
+   = 
+   \left\{ \begin{array}{lr}
+     \left( \kappa_\parallel - \Frac{\tau_y \sqrt{\kappa_\parallel \phi}}{\rho g \alpha_\parallel \xi} \right) 
+     & \hspace{-3mm} \left[ \left( h- \Frac{\tau_y \alpha_\parallel \sqrt{\kappa_\parallel}}{\rho g \sqrt{\kappa_\parallel} \xi 
+                                      - \sqrt{\phi} \tau_y}  \right) 
+     -  \sqrt{\kappa_\parallel} \tanh\left( \Frac{h_c(h,\xi)}{\sqrt{\kappa_\parallel}} \right)\right] 
+     \\  & \text{ when } h_c(h,\xi) > 0,
+     \\
+     &\\
+     0 
+     & \text{ otherwise,}
+   \end{array} \right.
+%    \label{eq-reduced-nu}
+\end{equation*}
+
+with
+
+\begin{equation*} 
+% \label{general-expression-hc-dimension}
+   h_c(h,\xi)
+  = 
+  \begin{cases} 
+    \phantom{-}
+     0 & \text{ when }  h\left(\rho g \sqrt{\kappa_\parallel} \alpha_\parallel \xi - \sqrt{\phi} \tau_y \right) \leq \tau_y
+    \\
+     G^{-1}_{h,\xi}(0)
+    & \text{ when }  h\left(\rho g \sqrt{\kappa_\parallel} \alpha_\parallel \xi - \sqrt{\phi} \tau_y \right) > \tau_y
+  \end{cases}
+\end{equation*}
+
+where for all $z\in ]0,h]$ and $h,~\xi$ in $\R^+$ the function $G$ satisfies:
+\begin{equation*}
+G_{h,\xi} (z) =  \sqrt{\kappa_\parallel} \alpha_\parallel \tau_y \cosh\left(\Frac{z}{\sqrt{\kappa_\parallel}}\right) 
+                              + ( z -  h )\left(\sqrt{\kappa_\parallel} \alpha_\parallel \rho g \xi-\sqrt{\phi} \tau_y \right).
+\end{equation*}
+See the set of parameters for this model in table 1. \\
+
+\begin{tabular}{|c|c|}%
+      \hline name & notation  \\ \hline
+      flow height & $h$  \\
+      topography  & $f$  \\
+      viscosity & $\eta$  \\
+      yield stress & $\tau_y$  \\
+      density & $\rho$  \\
+      gravity constant & $g$ \\
+      input velocity  & $w_e$  \\
+      horizontal permeability & $\kappa_\parallel$  \\
+      porosity & $\phi$  \\
+      shift factor & $\alpha_\parallel$ \\ \hline
+\end{tabular}%
+\\
+{\bf{Table 1}:} Notation of parameters and units
+ \\
+ 
+The mathematical notation
+\mbox{$
+	\Nabla_{\parallel} = (\partial_x, \partial_y)
+$}
+denotes the gradient vector in the $Oxy$ plane and
+\mbox{$
+	\text{div}_{\parallel} \mathbf{v}_{\parallel} = \partial_x v_x + \partial_y v_y
+$}
+denotes the corresponding plane divergence.
+
+In the reduced problem, the $z = f + h_c$ surface splits the flow in
+two zones: the $z \leq f +hc$ zone is sheared while the $z \geq f +h_c$ one is rigid. Remark
+that when $h_c = 0$, there is only a rigid zone. Thanks to the non-slip boundary condition at $z = f$, the fluid is locally arrested, i.e. $\mu=0$.
+
+The numerical method to solve this problem is detailed in [ref].
+
+Using this model, Bernabeu et al. also introduce the concept of lava flowing through an array of obstacle, to simualte the lava flowing through a lava-tree network. They reduce the problem via an equivalent porous medium (see ref for more details).
+
+% -----------------------------------------------------------------------------
+\section{Numerical development / resolution }
+% -----------------------------------------------------------------------------
+To reduce computation time to numerical resolution is done via ...blabalab
+and blabla
+% -----------------------------------------------------------------------------
+\section{Computing requesitory}
+% -----------------------------------------------------------------------------
+
+TODO
+
+% -----------------------------------------------------------------------------
+\section{Validation cases}
+% -----------------------------------------------------------------------------
+\subsection{Etna 2001}
+\subsection{Kilauea 2018 ?}
+\subsection{Piton de la Fournaise 2018?}
+
+\section{Conclusion}
+% -----------------------------------------------------------------------------
+In this article we present ShaLava a software to run lava flow simulations in 3-D over any DEM. The simulation are based on a shallow-approximation model see Bernabeu et al, 2018. The flow is considered to follow a bingham rheology were thermal effect are not taken into account but are simulated
+
+The model is coded in python and open access to anyone within a repository (github blabla).
+A user friendly interface has been created so any
+T
+
+
+% -----------------------------------------------------------------------------
+\section*{Acknowledgements}
+% -----------------------------------------------------------------------------
+This research was financed by the Agence National de la Recherche through the project LAVA (Program: DS0902 2016; Project: ANR-16 CE39-0009, http://www.agence-nationale-recherche.fr/ Projet-ANR-16-CE39-0009). This is ANR-LAVA contribution no. XX.
+
+% -----------------------------------------------------------------------------
+\section*{References}
+\bibliography{Biblio_Orya}
+
+\end{document} 
